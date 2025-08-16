@@ -34,42 +34,43 @@ quotes = [
     "Patterns of the Soul","The Hidden Flow","Soulful Lines of Life","The Brush of Joy",
     "Mystic Horizons","The Painted Path","The Flowing Canvas","Lines of Inspiration",
     "The Sacred Brush","Echoing Vibrance","The Art of Being","The Infinite Spiral"
-]  # 100+ quotes
+]
 
 signature = "Onyekachi Art"
 history_file = "art_history.txt"
-num_artworks = 7  # Number of unique artworks to generate
+output_dir = "artworks"  # folder for generated images
+num_artworks = 7
 
-# ===== HELPER: Load previous seeds =====
+# ===== CREATE OUTPUT FOLDER =====
+os.makedirs(output_dir, exist_ok=True)
+
+# ===== LOAD PREVIOUS SEEDS =====
 if os.path.exists(history_file):
     with open(history_file, "r") as f:
         used_seeds = set(int(line.strip()) for line in f.readlines())
 else:
     used_seeds = set()
 
-# ===== GENERATE MULTIPLE UNIQUE ARTWORKS =====
+# ===== GENERATE UNIQUE ARTWORKS =====
 for n in range(num_artworks):
-    # Unique seed
     while True:
         seed = random.randint(0, 10_000_000)
         if seed not in used_seeds:
             used_seeds.add(seed)
             break
+
     random.seed(seed)
     np.random.seed(seed)
 
-    # Pick random quote
     title = random.choice(quotes)
 
-    # Canvas
     fig, ax = plt.subplots(figsize=(6,6))
     ax.set_facecolor("white")
     ax.axis("off")
 
-    # Complex brush strokes
-    brush_shapes = ['o','s','^']  # circle, square, triangle
+    brush_shapes = ['o','s','^']
     num_strokes = 500
-    for i in range(num_strokes):
+    for _ in range(num_strokes):
         x, y = np.random.rand(2)
         size = np.random.rand() * 500
         color = np.random.rand(3,)
@@ -82,16 +83,15 @@ for n in range(num_artworks):
     plt.text(0.98, 0.02, signature, ha='right', va='bottom',
              fontsize=10, color="gray", alpha=0.7, transform=ax.transAxes)
 
-    # Save artwork
     today = datetime.date.today().strftime("%Y-%m-%d")
-    filename = f"artwork_{today}_{seed}.png"
+    filename = f"{output_dir}/artwork_{today}_{seed}.png"
     plt.savefig(filename, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
     print(f"Artwork saved as {filename} with label: {title}")
 
 # ===== UPDATE HISTORY =====
-with open(history_file, "a") as f:
+with open(history_file, "w") as f:  # overwrite to keep history clean
     for s in used_seeds:
         f.write(f"{s}\n")
 
