@@ -1,6 +1,2 @@
-# Recommended Python version
-python>=3.9
-
-# Required libraries for art generation
-matplotlib>=3.0.0  # for drawing and saving artworks
-numpy>=1.18.0      # for random numbers and array operations
+matplotlib>=3.0.0
+numpy>=1.18.0
