@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import random
 import os
+import subprocess
 
 # ===== CONFIG =====
 quotes = [
@@ -38,10 +39,11 @@ quotes = [
 
 signature = "Onyekachi Art"
 history_file = "art_history.txt"
-output_dir = "artworks"  # folder for generated images
 num_artworks = 7
 
-# ===== CREATE OUTPUT FOLDER =====
+# ===== CREATE DAILY OUTPUT FOLDER =====
+today = datetime.date.today().strftime("%Y-%m-%d")
+output_dir = os.path.join("artworks", today)
 os.makedirs(output_dir, exist_ok=True)
 
 # ===== LOAD PREVIOUS SEEDS =====
@@ -52,7 +54,9 @@ else:
     used_seeds = set()
 
 # ===== GENERATE UNIQUE ARTWORKS =====
-for n in range(num_artworks):
+available_quotes = quotes.copy()
+for _ in range(num_artworks):
+    # Pick a unique seed
     while True:
         seed = random.randint(0, 10_000_000)
         if seed not in used_seeds:
@@ -62,12 +66,19 @@ for n in range(num_artworks):
     random.seed(seed)
     np.random.seed(seed)
 
-    title = random.choice(quotes)
+    # Pick a unique title
+    if available_quotes:
+        title = random.choice(available_quotes)
+        available_quotes.remove(title)
+    else:
+        title = random.choice(quotes)
 
+    # Create canvas
     fig, ax = plt.subplots(figsize=(6,6))
     ax.set_facecolor("white")
     ax.axis("off")
 
+    # Brush strokes
     brush_shapes = ['o','s','^']
     num_strokes = 500
     for _ in range(num_strokes):
@@ -77,22 +88,25 @@ for n in range(num_artworks):
         shape = random.choice(brush_shapes)
         ax.scatter(x, y, s=size, c=[color], alpha=0.6, marker=shape)
 
-    # Label + Signature
+    # Label + signature
     plt.text(0.5, -0.08, title, ha='center', va='top',
              fontsize=16, fontweight='bold', color="black", transform=ax.transAxes)
     plt.text(0.98, 0.02, signature, ha='right', va='bottom',
              fontsize=10, color="gray", alpha=0.7, transform=ax.transAxes)
 
-    today = datetime.date.today().strftime("%Y-%m-%d")
-    filename = f"{output_dir}/artwork_{today}_{seed}.png"
+    # Save artwork
+    filename = os.path.join(output_dir, f"artwork_{today}_{seed}.png")
     plt.savefig(filename, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
     print(f"Artwork saved as {filename} with label: {title}")
 
 # ===== UPDATE HISTORY =====
-with open(history_file, "w") as f:  # overwrite to keep history clean
+with open(history_file, "a") as f:
     for s in used_seeds:
         f.write(f"{s}\n")
+
+# ===== OPEN FOLDER =====
+subprocess.run(['cmd', '/c', 'start', output_dir])
 
 print(f"{num_artworks} unique artworks generated successfully!")
