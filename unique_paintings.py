@@ -107,6 +107,6 @@ with open(history_file, "a") as f:
         f.write(f"{s}\n")
 
 # ===== OPEN FOLDER =====
-subprocess.run(['cmd', '/c', 'start', output_dir])
+os.startfile(output_dir)
 
 print(f"{num_artworks} unique artworks generated successfully!")
